@@ -40,19 +40,10 @@ function evaluate(XChunk,YChunk,LChunk,XTEChunk,YTEChunk,LTEChunk,param,Lindex,w
             A2 = squareform(d) + eye(size(w,1));
             A = A2;
             KK = WW * K(:,1:c);
-            Z = nbits*KK*A + alpha*KK;
-
-            Temp = Z*Z'-1/c*(Z*ones(c,1)*(ones(1,c)*Z'));
-            [~,Lmd,QQ] = svd(Temp); clear Temp
-            idx = (diag(Lmd)>1e-6);
-            Q = QQ(:,idx); Q_ = orth(QQ(:,~idx));
-            P = (Z'-1/c*ones(c,1)*(ones(1,c)*Z')) *  (Q / (sqrt(Lmd(idx,idx))));
-            if c>nbits-length(find(idx==1))
-                P_ = orth(randn(c,(nbits-length(find(idx==1)))));
-            else
-                P_ = orth(randn((nbits-length(find(idx==1))),c))';
-            end
-            H = sqrt(c)*[Q Q_]*[P P_]';
+            
+            H1 = KK * KK' + alpha * eye(nbits);
+            H2 = alpha * KK * A + alpha * KK;
+            H = H1\H2;
             HH(:,1:c) = H;
             [Wx,Wy,BB,MM] = train0(XTrain_new,YTrain_new,param,LTrain_new,GTrain_new,H);
         else
@@ -65,21 +56,10 @@ function evaluate(XChunk,YChunk,LChunk,XTEChunk,YTEChunk,LTEChunk,param,Lindex,w
 
             KK_new = WW * K(:,prenlabels+1:c);
             KK_old = WW * K(:,1:prenlabels);
-            Z = nbits*(KK_new*Ann+KK_old*Ano) + alpha*KK_new;
-            
-            c_new = c-prenlabels;
 
-            Temp = Z*Z'-1/c_new*(Z*ones(c_new,1)*(ones(1,c_new)*Z'));
-           [~,Lmd,QQ] = svd(Temp); clear Temp
-            idx = (diag(Lmd)>1e-6);
-            Q = QQ(:,idx); Q_ = orth(QQ(:,~idx));
-            P = (Z'-1/c_new*ones(c_new,1)*(ones(1,c_new)*Z')) *  (Q / (sqrt(Lmd(idx,idx))));
-            if c_new>nbits-length(find(idx==1))
-                P_ = orth(randn(c_new,(nbits-length(find(idx==1)))));
-            else
-                P_ = orth(randn((nbits-length(find(idx==1))),c_new))';
-            end
-            H = sqrt(c_new)*[Q Q_]*[P P_]';
+            H1 = KK_new * KK_new' + KK_old * KK_old' + alpha * eye(nbits);
+            H2 = nbits * KK_old * Ano + nbits * KK_new * Ann + alpha * KK_new;
+            H = H1\H2;
             HH(:,prenlabels+1:c) = H;
             [Wx,Wy,BB,MM] = train(XTrain_new,YTrain_new,param,LTrain_new,GTrain_new,HH(:,1:c),BB,MM);
         end
@@ -102,5 +82,5 @@ function evaluate(XChunk,YChunk,LChunk,XTEChunk,YTEChunk,LTEChunk,param,Lindex,w
     DHamm = hammingDist(ByTest, BxTrain);
     [~, orderH] = sort(DHamm, 2);
     Text_VS_Image_MAP = mAP(orderH', LTrain, LTest);
-    fprintf('Image-to-Text,MAP:%f    Text-to-Image,MAP:%f \n',Image_VS_Text_MAP,Text_VS_Image_MAP);
+    fprintf('Image-to-Text,MAP:%f    Text-to-Image,MAP:%f \n\n',Image_VS_Text_MAP,Text_VS_Image_MAP);
 end

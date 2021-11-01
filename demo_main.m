@@ -1,6 +1,6 @@
 
 db_name = 'mir';
-loopnbits = [8 16 32 64 128];
+loopnbits = [16 32 64 96 128];
 param.top_K = 2000;
 
 %% load dataset
@@ -67,13 +67,13 @@ for ii =1:length(loopnbits)
     if strcmp(db_name, 'mir')
         fprintf('......%s start...... \n\n', 'THOR');
         param.theta=0.1;  param.beta=100;  param.gamma = 10;
-        param.alpha=10;  param.iter=7;
+        param.alpha=10;  param.iter=1;
         OURparam = param;
         evaluate(XChunk,YChunk,LChunk,XTEChunk,YTEChunk,LTEChunk,OURparam,Q,word2vector_300);
     elseif strcmp(db_name, 'nus')
         fprintf('......%s start...... \n\n', 'THOR');
-        param.theta=1;  param.beta=0.001;  param.gamma = 1000;
-        param.alpha=10;  param.iter=7;
+        param.theta=0.1;  param.beta=0.001;  param.gamma = 1000;
+        param.alpha=1;  param.iter=1;
         OURparam = param;
         evaluate(XChunk,YChunk,LChunk,XTEChunk,YTEChunk,LTEChunk,OURparam,Q,word2vector_300);
     end

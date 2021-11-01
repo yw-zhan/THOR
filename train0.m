@@ -1,4 +1,4 @@
-function [Wx,Wy,BB,MM] = train0_ver4online(X, Y, param, L, G, H)
+function [Wx,Wy,BB,MM] = train0(X, Y, param, L, G, H)
 
 
 %% set the parameters
@@ -20,10 +20,15 @@ G = G';
 
 %% initialization
 B = sign(randn(nbits, n));
+V = randn(nbits,n);
 
 %% iterative optimization
 for iter = 1:param.iter
-   
+
+    % updata U
+    [UB,~,UA] = svd(B*V');
+    U = UA*UB';
+
     % update V
     Z2 = beta*nbits*(2*(B*G')*G-B*ones(n,1)*ones(1,n)) + theta*B;
     Temp = Z2*Z2'-1/n*(Z2*ones(n,1)*(ones(1,n)*Z2'));
@@ -48,6 +53,7 @@ end
     M7 = X*X';
     M8 = Y*Y';
     M9 = B*B';
+    M10 = B*V';
     
     MM{1,1} = M1;
     MM{1,2} = M2;
@@ -58,6 +64,7 @@ end
     MM{1,7} = M7;
     MM{1,8} = M8;
     MM{1,9} = M9;
+    MM{1,10} = M10;
 
     BB{1,1} = B';
 
